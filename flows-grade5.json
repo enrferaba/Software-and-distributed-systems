@@ -1,0 +1,752 @@
+[
+    {
+        "id": "0f3f6c69bd4d60fa",
+        "type": "tab",
+        "label": "Grade 5 Telemetry",
+        "disabled": false,
+        "info": "Synthetic telemetry, validation, dedupe, SQLite persistence, CSV APIs, health checks, and dashboard for Grade 5 requirements."
+    },
+    {
+        "id": "a7f08e54b1a2c3d4",
+        "type": "sqlitedb",
+        "name": "grade5-db",
+        "db": "/data/grade5-readings.db",
+        "mode": "RWC"
+    },
+    {
+        "id": "7a8d90f3f1bdc4a1",
+        "type": "ui_tab",
+        "name": "Grade 5",
+        "icon": "dashboard",
+        "disabled": false,
+        "hidden": false
+    },
+    {
+        "id": "3b54c1e5f02a78cd",
+        "type": "ui_group",
+        "name": "Overview",
+        "tab": "7a8d90f3f1bdc4a1",
+        "order": 1,
+        "disp": true,
+        "width": "12",
+        "collapse": false
+    },
+    {
+        "id": "9c1a2b3c4d5e6f01",
+        "type": "inject",
+        "z": "0f3f6c69bd4d60fa",
+        "name": "Level generator",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "1",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "{}",
+        "payloadType": "json",
+        "x": 160,
+        "y": 80,
+        "wires": [
+            [
+                "aa11bb22cc33dd44"
+            ]
+        ]
+    },
+    {
+        "id": "d3e4f5a6b7c8d9e0",
+        "type": "inject",
+        "z": "0f3f6c69bd4d60fa",
+        "name": "Flow generator",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "1",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.2,
+        "topic": "",
+        "payload": "{}",
+        "payloadType": "json",
+        "x": 160,
+        "y": 140,
+        "wires": [
+            [
+                "bb22cc33dd44ee55"
+            ]
+        ]
+    },
+    {
+        "id": "c1d2e3f4a5b6c7d8",
+        "type": "inject",
+        "z": "0f3f6c69bd4d60fa",
+        "name": "Rain generator",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "5",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.3,
+        "topic": "",
+        "payload": "{}",
+        "payloadType": "json",
+        "x": 160,
+        "y": 200,
+        "wires": [
+            [
+                "cc33dd44ee55ff66"
+            ]
+        ]
+    },
+    {
+        "id": "b2c3d4e5f6a7b8c9",
+        "type": "inject",
+        "z": "0f3f6c69bd4d60fa",
+        "name": "Quality generator",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "2",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.4,
+        "topic": "",
+        "payload": "{}",
+        "payloadType": "json",
+        "x": 170,
+        "y": 260,
+        "wires": [
+            [
+                "dd44ee55ff667788"
+            ]
+        ]
+    },
+    {
+        "id": "aa11bb22cc33dd44",
+        "type": "function",
+        "z": "0f3f6c69bd4d60fa",
+        "name": "Build level reading",
+        "func": "const now = new Date();\nconst value = 1.4 + 0.25 * Math.sin(now.getTime() / 60000) + (Math.random() - 0.5) * 0.05;\nmsg.payload = {\n    ts_iso8601: now.toISOString(),\n    site_id: 'MH-12',\n    district: 'triana',\n    metric: 'level',\n    value: Number(value.toFixed(3)),\n    unit: 'm',\n    quality: 'good',\n    source: 'sim.level',\n    reading_id: `MH-12-level-${now.getTime()}`\n};\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 420,
+        "y": 80,
+        "wires": [
+            [
+                "1a2b3c4d5e6f7081"
+            ]
+        ]
+    },
+    {
+        "id": "bb22cc33dd44ee55",
+        "type": "function",
+        "z": "0f3f6c69bd4d60fa",
+        "name": "Build flow reading",
+        "func": "const now = new Date();\nconst value = 90 + 10 * Math.sin(now.getTime() / 45000) + (Math.random() - 0.5) * 3;\nmsg.payload = {\n    ts_iso8601: now.toISOString(),\n    site_id: 'MH-14',\n    district: 'nervion',\n    metric: 'flow',\n    value: Number(value.toFixed(2)),\n    unit: 'lps',\n    quality: 'good',\n    source: 'sim.flow',\n    reading_id: `MH-14-flow-${now.getTime()}`\n};\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 420,
+        "y": 140,
+        "wires": [
+            [
+                "1a2b3c4d5e6f7081"
+            ]
+        ]
+    },
+    {
+        "id": "cc33dd44ee55ff66",
+        "type": "function",
+        "z": "0f3f6c69bd4d60fa",
+        "name": "Build rain reading",
+        "func": "const now = new Date();\nconst base = Math.max(0, 4 * Math.sin(now.getTime() / 3600000) + Math.random());\nmsg.payload = {\n    ts_iso8601: now.toISOString(),\n    site_id: 'RG-02',\n    district: 'macarena',\n    metric: 'rain',\n    value: Number(base.toFixed(2)),\n    unit: 'mmh',\n    quality: 'good',\n    source: 'sim.rain',\n    reading_id: `RG-02-rain-${now.getTime()}`\n};\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 420,
+        "y": 200,
+        "wires": [
+            [
+                "1a2b3c4d5e6f7081"
+            ]
+        ]
+    },
+    {
+        "id": "dd44ee55ff667788",
+        "type": "function",
+        "z": "0f3f6c69bd4d60fa",
+        "name": "Build quality reading",
+        "func": "const now = new Date();\nconst index = 0.9 + 0.1 * Math.sin(now.getTime() / 90000) + (Math.random() - 0.5) * 0.02;\nmsg.payload = {\n    ts_iso8601: now.toISOString(),\n    site_id: 'MH-12',\n    district: 'triana',\n    metric: 'quality',\n    value: Number(index.toFixed(3)),\n    unit: 'idx',\n    quality: index > 0.8 ? 'good' : 'check',\n    source: 'sim.quality',\n    reading_id: `MH-12-quality-${now.getTime()}`\n};\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 430,
+        "y": 260,
+        "wires": [
+            [
+                "1a2b3c4d5e6f7081"
+            ]
+        ]
+    },
+    {
+        "id": "1a2b3c4d5e6f7081",
+        "type": "function",
+        "z": "0f3f6c69bd4d60fa",
+        "name": "Enrich & validate",
+        "func": "const payload = msg.payload || {};\nconst required = ['ts_iso8601', 'site_id', 'district', 'metric', 'value', 'unit', 'quality', 'source', 'reading_id'];\nfor (const field of required) {\n    if (payload[field] === undefined || payload[field] === null || payload[field] === '') {\n        return [null, {\n            payload: {\n                reason: `missing_${field}`,\n                reading: payload\n            }\n        }];\n    }\n}\nif (Number.isNaN(Number(payload.value))) {\n    return [null, {\n        payload: {\n            reason: 'invalid_value',\n            reading: payload\n        }\n    }];\n}\nconst traceSeq = flow.get('traceSeq') || 0;\nconst spanSeq = flow.get('spanSeq') || 0;\npayload.trace_id = payload.trace_id || `g5-trace-${traceSeq + 1}`;\npayload.span_id = payload.span_id || `g5-span-${spanSeq + 1}`;\npayload.schema_ver = 'g5.v1';\nflow.set('traceSeq', (traceSeq + 1) % 1000000);\nflow.set('spanSeq', (spanSeq + 1) % 1000000);\nmsg.payload = payload;\nmsg.trace_id = payload.trace_id;\nmsg.span_id = payload.span_id;\nmsg.topic = `sewer.${payload.district}.${payload.site_id}.${payload.metric}`;\nmsg._ingest_received_ms = Date.now();\nreturn [msg, null];",
+        "outputs": 2,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 690,
+        "y": 160,
+        "wires": [
+            [
+                "2b3c4d5e6f708192"
+            ],
+            [
+                "d08c9dadbececfdf"
+            ]
+        ]
+    },
+    {
+        "id": "2b3c4d5e6f708192",
+        "type": "function",
+        "z": "0f3f6c69bd4d60fa",
+        "name": "Deduplicate by reading_id",
+        "func": "const payload = msg.payload;\nconst id = payload.reading_id;\nconst now = Date.now();\nlet seen = flow.get('seenReadingIds');\nif (!seen) {\n    seen = {};\n}\nif (seen[id]) {\n    const stats = flow.get('metrics') || {ingest_total: 0, errors: 0, duplicates: 0, timestamps: [], latencies: [], queue_depth: 0, consumer_lag_ms: 0, alerts_active: 0};\n    stats.duplicates = (stats.duplicates || 0) + 1;\n    flow.set('metrics', stats);\n    return null;\n}\nseen[id] = now;\nconst retentionMs = 15 * 60 * 1000;\nfor (const key of Object.keys(seen)) {\n    if (now - seen[key] > retentionMs) {\n        delete seen[key];\n    }\n}\nflow.set('seenReadingIds', seen);\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 950,
+        "y": 140,
+        "wires": [
+            [
+                "3c4d5e6f708192a3",
+                "bec5d6e7f8a9bab0"
+            ]
+        ]
+    },
+    {
+        "id": "3c4d5e6f708192a3",
+        "type": "function",
+        "z": "0f3f6c69bd4d60fa",
+        "name": "Update ingest metrics",
+        "func": "const payload = msg.payload;\nconst now = Date.now();\nconst stats = flow.get('metrics') || {ingest_total: 0, errors: 0, duplicates: 0, timestamps: [], latencies: [], queue_depth: 0, consumer_lag_ms: 0, alerts_active: 0};\nstats.ingest_total += 1;\nstats.last_ingest_ts = now;\nstats.timestamps.push(now);\nif (stats.timestamps.length > 200) {\n    stats.timestamps.shift();\n}\nconst latency = now - new Date(payload.ts_iso8601).getTime();\nstats.latencies.push(latency);\nif (stats.latencies.length > 200) {\n    stats.latencies.shift();\n}\nstats.queue_depth = 0;\nstats.consumer_lag_ms = 0;\nflow.set('metrics', stats);\nmsg._latency_ms = latency;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1230,
+        "y": 120,
+        "wires": [
+            [
+                "4d5e6f708192a3b4"
+            ]
+        ]
+    },
+    {
+        "id": "4d5e6f708192a3b4",
+        "type": "function",
+        "z": "0f3f6c69bd4d60fa",
+        "name": "Prepare SQLite upsert",
+        "func": "const payload = msg.payload;\nmsg.topic = 'INSERT OR IGNORE INTO readings (ts_iso8601, site_id, district, metric, value, unit, quality, source, reading_id, trace_id, span_id, schema_ver) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';\nmsg.params = [\n    payload.ts_iso8601,\n    payload.site_id,\n    payload.district,\n    payload.metric,\n    Number(payload.value),\n    payload.unit,\n    payload.quality,\n    payload.source,\n    payload.reading_id,\n    payload.trace_id,\n    payload.span_id,\n    payload.schema_ver\n];\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1500,
+        "y": 120,
+        "wires": [
+            [
+                "5e6f708192a3b4c5"
+            ]
+        ]
+    },
+    {
+        "id": "5e6f708192a3b4c5",
+        "type": "sqlite",
+        "z": "0f3f6c69bd4d60fa",
+        "mydb": "a7f08e54b1a2c3d4",
+        "name": "Readings store",
+        "sqlquery": "msg.topic",
+        "sql": "",
+        "params": "msg.params",
+        "x": 1750,
+        "y": 160,
+        "wires": [
+            [
+                "6f708192a3b4c5d6"
+            ]
+        ]
+    },
+    {
+        "id": "6f708192a3b4c5d6",
+        "type": "function",
+        "z": "0f3f6c69bd4d60fa",
+        "name": "Mark DB ready",
+        "func": "flow.set('dbReady', true);\nreturn null;",
+        "outputs": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1990,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "7a8192a3b4c5d6e7",
+        "type": "inject",
+        "z": "0f3f6c69bd4d60fa",
+        "name": "Init DB schema",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.2,
+        "topic": "",
+        "payload": "{}",
+        "payloadType": "json",
+        "x": 170,
+        "y": 340,
+        "wires": [
+            [
+                "8b92a3b4c5d6e7f8"
+            ]
+        ]
+    },
+    {
+        "id": "8b92a3b4c5d6e7f8",
+        "type": "function",
+        "z": "0f3f6c69bd4d60fa",
+        "name": "Build schema statements",
+        "func": "const statements = [\n    'CREATE TABLE IF NOT EXISTS readings (ts_iso8601 TEXT, site_id TEXT, district TEXT, metric TEXT, value REAL, unit TEXT, quality TEXT, source TEXT, reading_id TEXT PRIMARY KEY, trace_id TEXT, span_id TEXT, schema_ver TEXT);',\n    'CREATE INDEX IF NOT EXISTS idx_readings_site_metric_ts ON readings (site_id, metric, ts_iso8601 DESC);'\n];\nfor (const topic of statements) {\n    node.send({ topic });\n}\nreturn null;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 460,
+        "y": 340,
+        "wires": [
+            [
+                "5e6f708192a3b4c5"
+            ]
+        ]
+    },
+    {
+        "id": "bec5d6e7f8a9bab0",
+        "type": "function",
+        "z": "0f3f6c69bd4d60fa",
+        "name": "Prepare dashboard data",
+        "func": "const reading = msg.payload;\nconst chartMsg = {\n    topic: reading.metric,\n    payload: Number(reading.value),\n    series: reading.site_id,\n    ts_iso8601: reading.ts_iso8601\n};\nconst summaryMsg = {\n    payload: `${reading.metric.toUpperCase()} ${reading.site_id}: ${Number(reading.value).toFixed(2)} ${reading.unit} (${reading.quality}) @ ${reading.ts_iso8601}`\n};\nreturn [chartMsg, summaryMsg];",
+        "outputs": 2,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1240,
+        "y": 220,
+        "wires": [
+            [
+                "9ca3b4c5d6e7f8a9"
+            ],
+            [
+                "adb4c5d6e7f8a9ba"
+            ]
+        ]
+    },
+    {
+        "id": "9ca3b4c5d6e7f8a9",
+        "type": "ui_chart",
+        "z": "0f3f6c69bd4d60fa",
+        "name": "Telemetry chart",
+        "group": "3b54c1e5f02a78cd",
+        "order": 1,
+        "width": 12,
+        "height": 6,
+        "label": "Telemetry",
+        "chartType": "line",
+        "legend": "true",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "Waiting for data",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": 120,
+        "removeOlderPoints": "",
+        "removeOlderUnit": "60",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#ff7f0e",
+            "#2ca02c",
+            "#d62728"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 1540,
+        "y": 220,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "adb4c5d6e7f8a9ba",
+        "type": "ui_text",
+        "z": "0f3f6c69bd4d60fa",
+        "group": "3b54c1e5f02a78cd",
+        "order": 2,
+        "width": 12,
+        "height": 2,
+        "name": "Last reading",
+        "label": "Latest",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "x": 1550,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "cfd6e7f8a9bab0c1",
+        "type": "http in",
+        "z": "0f3f6c69bd4d60fa",
+        "name": "CSV import",
+        "url": "/csv/import",
+        "method": "post",
+        "upload": true,
+        "swaggerDoc": "",
+        "x": 130,
+        "y": 420,
+        "wires": [
+            [
+                "d0e7f8a9bab0c1d2"
+            ]
+        ]
+    },
+    {
+        "id": "d0e7f8a9bab0c1d2",
+        "type": "function",
+        "z": "0f3f6c69bd4d60fa",
+        "name": "Process CSV import",
+        "func": "const raw = typeof msg.payload === 'string' ? msg.payload : (msg.payload && msg.payload.toString ? msg.payload.toString() : '');\nif (!raw.trim()) {\n    msg.statusCode = 400;\n    msg.payload = { error: 'empty_body' };\n    msg.headers = { 'Content-Type': 'application/json' };\n    return [msg, null];\n}\nconst lines = raw.trim().split(/\r?\n/);\nif (lines.length < 2) {\n    msg.statusCode = 400;\n    msg.payload = { error: 'missing_rows' };\n    msg.headers = { 'Content-Type': 'application/json' };\n    return [msg, null];\n}\nconst header = lines.shift().split(',').map(h => h.trim());\nconst required = ['ts_iso8601', 'site_id', 'district', 'metric', 'value', 'unit', 'quality', 'source', 'reading_id'];\nconst missing = required.filter(h => !header.includes(h));\nif (missing.length) {\n    msg.statusCode = 400;\n    msg.payload = { error: 'missing_headers', details: missing };\n    msg.headers = { 'Content-Type': 'application/json' };\n    return [msg, null];\n}\nlet accepted = 0;\nfor (const line of lines) {\n    if (!line.trim()) {\n        continue;\n    }\n    const cells = line.split(',');\n    const record = {};\n    header.forEach((h, idx) => {\n        record[h] = cells[idx] ? cells[idx].trim() : '';\n    });\n    const outMsg = {\n        payload: {\n            ts_iso8601: record.ts_iso8601,\n            site_id: record.site_id,\n            district: record.district,\n            metric: record.metric,\n            value: Number(record.value),\n            unit: record.unit,\n            quality: record.quality || 'check',\n            source: record.source || 'csv.import',\n            reading_id: record.reading_id\n        }\n    };\n    node.send([null, outMsg]);\n    accepted += 1;\n}\nmsg.statusCode = 202;\nmsg.payload = { accepted };\nmsg.headers = { 'Content-Type': 'application/json' };\nreturn [msg, null];",
+        "outputs": 2,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 420,
+        "y": 420,
+        "wires": [
+            [
+                "e1f8a9bab0c1d2e3"
+            ],
+            [
+                "1a2b3c4d5e6f7081"
+            ]
+        ]
+    },
+    {
+        "id": "e1f8a9bab0c1d2e3",
+        "type": "http response",
+        "z": "0f3f6c69bd4d60fa",
+        "name": "HTTP response",
+        "statusCode": "",
+        "headers": {},
+        "x": 2050,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "f2a9bab0c1d2e3f4",
+        "type": "http in",
+        "z": "0f3f6c69bd4d60fa",
+        "name": "CSV export",
+        "url": "/csv/export",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 130,
+        "y": 480,
+        "wires": [
+            [
+                "03bab0c1d2e3f405"
+            ]
+        ]
+    },
+    {
+        "id": "03bab0c1d2e3f405",
+        "type": "function",
+        "z": "0f3f6c69bd4d60fa",
+        "name": "Prepare CSV export",
+        "func": "msg.topic = 'SELECT ts_iso8601, site_id, district, metric, value, unit, quality, source, reading_id FROM readings ORDER BY ts_iso8601 DESC LIMIT 200';\nmsg.params = [];\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 430,
+        "y": 480,
+        "wires": [
+            [
+                "14b0c1d2e3f40516"
+            ]
+        ]
+    },
+    {
+        "id": "14b0c1d2e3f40516",
+        "type": "sqlite",
+        "z": "0f3f6c69bd4d60fa",
+        "mydb": "a7f08e54b1a2c3d4",
+        "name": "Export query",
+        "sqlquery": "msg.topic",
+        "sql": "",
+        "params": "msg.params",
+        "x": 690,
+        "y": 480,
+        "wires": [
+            [
+                "25c1d2e3f4051627"
+            ]
+        ]
+    },
+    {
+        "id": "25c1d2e3f4051627",
+        "type": "function",
+        "z": "0f3f6c69bd4d60fa",
+        "name": "Rows to CSV",
+        "func": "const rows = Array.isArray(msg.payload) ? msg.payload : [];\nconst header = ['ts_iso8601', 'site_id', 'district', 'metric', 'value', 'unit', 'quality', 'source', 'reading_id'];\nconst lines = rows.map(row => header.map(col => row[col]).join(','));\nmsg.payload = [header.join(','), ...lines].join('\n');\nmsg.headers = { 'Content-Type': 'text/csv' };\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 950,
+        "y": 480,
+        "wires": [
+            [
+                "36d2e3f405162748"
+            ]
+        ]
+    },
+    {
+        "id": "36d2e3f405162748",
+        "type": "http response",
+        "z": "0f3f6c69bd4d60fa",
+        "name": "CSV response",
+        "statusCode": "",
+        "headers": {},
+        "x": 1200,
+        "y": 480,
+        "wires": []
+    },
+    {
+        "id": "47e3f40516274859",
+        "type": "http in",
+        "z": "0f3f6c69bd4d60fa",
+        "name": "Healthz",
+        "url": "/healthz",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 120,
+        "y": 560,
+        "wires": [
+            [
+                "58f405162748596a"
+            ]
+        ]
+    },
+    {
+        "id": "58f405162748596a",
+        "type": "function",
+        "z": "0f3f6c69bd4d60fa",
+        "name": "Build health payload",
+        "func": "const dbReady = flow.get('dbReady') === true;\nconst stats = flow.get('metrics') || {};\nconst body = {\n    status: dbReady ? 'ok' : 'initialising',\n    db: dbReady ? 'up' : 'down',\n    last_ingest_ts: stats.last_ingest_ts || null\n};\nmsg.statusCode = dbReady ? 200 : 503;\nmsg.payload = body;\nmsg.headers = { 'Content-Type': 'application/json' };\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 410,
+        "y": 560,
+        "wires": [
+            [
+                "6905162748596a7b"
+            ]
+        ]
+    },
+    {
+        "id": "6905162748596a7b",
+        "type": "http response",
+        "z": "0f3f6c69bd4d60fa",
+        "name": "Health response",
+        "statusCode": "",
+        "headers": {},
+        "x": 660,
+        "y": 560,
+        "wires": []
+    },
+    {
+        "id": "7a162748596a7b8c",
+        "type": "http in",
+        "z": "0f3f6c69bd4d60fa",
+        "name": "Readyz",
+        "url": "/readyz",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 120,
+        "y": 620,
+        "wires": [
+            [
+                "8b2748596a7b8c9d"
+            ]
+        ]
+    },
+    {
+        "id": "8b2748596a7b8c9d",
+        "type": "function",
+        "z": "0f3f6c69bd4d60fa",
+        "name": "Build ready payload",
+        "func": "const dbReady = flow.get('dbReady') === true;\nconst stats = flow.get('metrics') || {ingest_total: 0};\nconst ready = dbReady && (stats.ingest_total || 0) > 0;\nmsg.statusCode = ready ? 200 : 503;\nmsg.payload = { ready, ingest_total: stats.ingest_total || 0 };\nmsg.headers = { 'Content-Type': 'application/json' };\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 410,
+        "y": 620,
+        "wires": [
+            [
+                "9c48596a7b8c9dad"
+            ]
+        ]
+    },
+    {
+        "id": "9c48596a7b8c9dad",
+        "type": "http response",
+        "z": "0f3f6c69bd4d60fa",
+        "name": "Ready response",
+        "statusCode": "",
+        "headers": {},
+        "x": 660,
+        "y": 620,
+        "wires": []
+    },
+    {
+        "id": "ad596a7b8c9dadbe",
+        "type": "http in",
+        "z": "0f3f6c69bd4d60fa",
+        "name": "Metrics",
+        "url": "/metrics",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 120,
+        "y": 680,
+        "wires": [
+            [
+                "be6a7b8c9dadbece"
+            ]
+        ]
+    },
+    {
+        "id": "be6a7b8c9dadbece",
+        "type": "function",
+        "z": "0f3f6c69bd4d60fa",
+        "name": "Build metrics payload",
+        "func": "const stats = flow.get('metrics') || {ingest_total: 0, errors: 0, duplicates: 0, timestamps: [], latencies: [], queue_depth: 0, consumer_lag_ms: 0, alerts_active: 0};\nconst timestamps = stats.timestamps || [];\nlet ingestRate = 0;\nif (timestamps.length > 1) {\n    const span = (timestamps[timestamps.length - 1] - timestamps[0]) / 1000;\n    if (span > 0) {\n        ingestRate = (timestamps.length - 1) / span;\n    } else {\n        ingestRate = timestamps.length - 1;\n    }\n}\nconst latencies = (stats.latencies || []).slice().sort((a, b) => a - b);\nlet p95 = 0;\nif (latencies.length) {\n    const idx = Math.ceil(latencies.length * 0.95) - 1;\n    p95 = latencies[Math.max(0, idx)];\n}\nconst errorRate = stats.ingest_total > 0 ? stats.errors / stats.ingest_total : 0;\nconst lines = [\n    '# TYPE ingest_rate gauge',\n    `ingest_rate ${ingestRate.toFixed(3)}`,\n    '# TYPE consumer_lag gauge',\n    `consumer_lag ${Number(stats.consumer_lag_ms || 0).toFixed(0)}`,\n    '# TYPE queue_depth gauge',\n    `queue_depth ${Number(stats.queue_depth || 0).toFixed(0)}`,\n    '# TYPE e2e_latency_ms_p95 gauge',\n    `e2e_latency_ms_p95 ${Number(p95).toFixed(1)}`,\n    '# TYPE error_rate gauge',\n    `error_rate ${errorRate.toFixed(3)}`,\n    '# TYPE alerts_active gauge',\n    `alerts_active ${Number(stats.alerts_active || 0).toFixed(0)}`\n];\nmsg.payload = lines.join('\n');\nmsg.headers = { 'Content-Type': 'text/plain; version=0.0.4' };\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 430,
+        "y": 680,
+        "wires": [
+            [
+                "cf7b8c9dadbececf"
+            ]
+        ]
+    },
+    {
+        "id": "cf7b8c9dadbececf",
+        "type": "http response",
+        "z": "0f3f6c69bd4d60fa",
+        "name": "Metrics response",
+        "statusCode": "",
+        "headers": {},
+        "x": 700,
+        "y": 680,
+        "wires": []
+    },
+    {
+        "id": "d08c9dadbececfdf",
+        "type": "function",
+        "z": "0f3f6c69bd4d60fa",
+        "name": "Prepare DLQ entry",
+        "func": "const stats = flow.get('metrics') || {ingest_total: 0, errors: 0, duplicates: 0, timestamps: [], latencies: [], queue_depth: 0, consumer_lag_ms: 0, alerts_active: 0};\nstats.errors = (stats.errors || 0) + 1;\nflow.set('metrics', stats);\nconst entry = {\n    ts: new Date().toISOString(),\n    reason: msg.payload && msg.payload.reason ? msg.payload.reason : 'validation_failed',\n    reading: msg.payload && msg.payload.reading ? msg.payload.reading : msg.payload\n};\nmsg.payload = JSON.stringify(entry);\nmsg.filename = '/data/grade5-dlq.jsonl';\nmsg.appendNewline = true;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1010,
+        "y": 320,
+        "wires": [
+            [
+                "e19dadbececfdfef"
+            ]
+        ]
+    },
+    {
+        "id": "e19dadbececfdfef",
+        "type": "file",
+        "z": "0f3f6c69bd4d60fa",
+        "name": "DLQ file",
+        "filename": "",
+        "appendNewline": true,
+        "createDir": true,
+        "overwriteFile": "false",
+        "encoding": "utf8",
+        "x": 1270,
+        "y": 320,
+        "wires": [
+            []
+        ]
+    }
+]
